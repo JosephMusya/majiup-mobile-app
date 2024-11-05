@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Majiup",
+    "slug": "Majiup",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/majiup.png",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/alarm.wav"]
+        }
+      ]
+    ],
+    "splash": {
+      "image": "./assets/majiup.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.joseemusya.Majiup_Android"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/majiup.png",
+        "backgroundColor": "#ffffff",
+        "resizeMode": "cover"
+      },
+      "package": "com.joseemusya.Majiup_Android",
+      "permissions": ["android.permission.ACCESS_FINE_LOCATION"],
+      "googleServicesFile": "./android/app/google-services.json"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c884bf91-f101-404b-b209-5eef60f91d52"
+      }
+    }
+  }
+}

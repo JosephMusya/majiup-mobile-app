@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1031302478643",
+    "project_id": "majiup-android",
+    "storage_bucket": "majiup-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1031302478643:android:cd081a6defa6bf2b1e1c46",
+        "android_client_info": {
+          "package_name": "com.joseemusya.Majiup_Android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWgVLGg-93e5jQBsqC7vq11EPWVSDhpCQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

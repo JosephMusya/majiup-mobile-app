@@ -1,0 +1,7 @@
+export const getLiters = (
+  waterLevel: any,
+  tankHeight: number,
+  tankCapacity: number
+) => {
+  return Math.round(((tankHeight - waterLevel) / tankHeight) * tankCapacity);
+};
