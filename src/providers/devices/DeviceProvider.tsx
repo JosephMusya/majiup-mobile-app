@@ -679,7 +679,7 @@ export const DeviceProvider = ({ children }: Props) => {
             const pumpStatus = message.toString();
             if (device) {
                 // device.on = true;
-                device.actuators[0].value = Boolean(pumpStatus);
+                device.actuators[0].value.state = Number(pumpStatus);
                 setTanks([...devices]);
             }
         }
