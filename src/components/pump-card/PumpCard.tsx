@@ -46,7 +46,6 @@ export default function PumpCard({ pump }: { pump: X }) {
                 `Failed to switch pump ${state === 1 ? "ON" : "OFF"}`,
                 3000
             );
-            console.log(error);
         } finally {
         }
     };
@@ -54,6 +53,7 @@ export default function PumpCard({ pump }: { pump: X }) {
     useEffect(() => {
         pump && getPumpState(pump);
     }, [pump]);
+
     return (
         <View>
             {/* <TouchableNativeFeedback> */}
