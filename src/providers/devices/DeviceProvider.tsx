@@ -523,8 +523,8 @@ export const DeviceProvider = ({ children }: Props) => {
                     "Content-Type": "application/json",
                 },
             })
-            .then((data) => {
-                console.log("PUMPS: ", data);
+            .then(() => {
+                // console.log("PUMPS: ", data);
             });
 
         return devices;
