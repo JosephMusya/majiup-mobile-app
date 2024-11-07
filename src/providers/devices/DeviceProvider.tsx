@@ -18,6 +18,7 @@ import {
     WiFi,
     X,
     UserProfile,
+    MetaInformation,
     // MetaInformation,
 } from "../../types";
 import mqtt from "precompiled-mqtt";
@@ -87,6 +88,12 @@ type DeviceContextValues = {
     tanks: X[];
     pumps: X[];
     meters: X[];
+
+    updateDeviceMeta: (
+        meta: MetaInformation,
+        deviceId: string,
+        type: "PUMP" | "TANK"
+    ) => void;
 };
 
 type Props = {
@@ -169,6 +176,7 @@ export const DeviceContext = createContext<DeviceContextValues>({
     tanks: [],
     pumps: [],
     meters: [],
+    updateDeviceMeta: (meta, device, type) => {},
 });
 
 export const DeviceProvider = ({ children }: Props) => {
@@ -358,6 +366,74 @@ export const DeviceProvider = ({ children }: Props) => {
                 );
             })
         );
+    };
+
+    const updateDeviceMeta = (
+        meta: MetaInformation,
+        deviceId: string,
+        type: "TANK" | "PUMP"
+    ) => {
+        if (type === "TANK") {
+            const newTanks = tanks.map((device: X) => {
+                if (device.id === deviceId) {
+                    return {
+                        ...device,
+                        meta: meta,
+                    };
+                }
+                return device;
+            });
+
+            newTanks && setTanks([...newTanks]);
+            return;
+        } else if (type === "PUMP") {
+            const pumpToChange = pumps.find((pump) => {
+                return pump.id === deviceId;
+            });
+            console.log(
+                "-------------------------------------------------------------"
+            );
+            console.log("OLD\n");
+            console.log(
+                "-------------------------------------------------------------"
+            );
+
+            console.log(
+                pumps.map((pump) => {
+                    console.log(pump.id + " ----> " + pump.meta.assigned);
+                })
+            );
+
+            if (pumpToChange) {
+                // Create a new object with the updated meta field
+                console.log(pumpToChange);
+                const updatedDevice = {
+                    ...pumpToChange,
+                    meta: meta,
+                };
+
+                console.log(meta);
+
+                // Map over pumps to replace only the found device
+                const newPumps = pumps.map((device: X) => {
+                    return device.id === deviceId ? updatedDevice : device;
+                });
+                // console.log(
+                //     "-------------------------------------------------------------"
+                // );
+                // console.log("NEW\n");
+                // console.log(
+                //     "-------------------------------------------------------------"
+                // );
+                // console.log(
+                //     newPumps.map((pump) => {
+                //         console.log(pump.id + " ----> " + pump.meta.assigned);
+                //     })
+                // );
+
+                setPumps([...newPumps]);
+            }
+        }
     };
 
     useEffect(() => {
@@ -847,6 +923,7 @@ export const DeviceProvider = ({ children }: Props) => {
         tanks,
         pumps,
         meters,
+        updateDeviceMeta,
     };
     return (
         <DeviceContext.Provider value={value}>
