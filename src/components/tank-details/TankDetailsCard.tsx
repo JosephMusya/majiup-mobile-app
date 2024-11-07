@@ -33,12 +33,13 @@ const PumpSelection = ({
     tankId: string | undefined;
     pumps: X[];
     onCancel: () => void;
-    updatePump: (pumpId: string, status?: boolean) => Promise<void>; // Define type for updatePump
+    updatePump: (pumpID: string, status?: boolean) => Promise<void>; // Define type for updatePump
     meta?: MetaInformation;
 }) => {
-    const { ipAddress } = useDeviceContext();
+    const { ipAddress, updateDeviceMeta } = useDeviceContext();
     const [selectedPump, setSelectedPump] = useState<X | null>();
     const backendUrl = getBackendUrl(ipAddress);
+    const [allocatingPump, setAllocatingPump] = useState<boolean>(false);
 
     const [tankMeta, setTankMeta] = useState<{
         metaData: MetaInformation | undefined;
@@ -59,26 +60,34 @@ const PumpSelection = ({
         setSelectedPump(pump);
     };
 
-    const allocatePump = async (pumpId: string) => {
-        try {
-            const responseMetaData = await axios.post(
-                `${backendUrl}/tanks/${tankId}/profile`,
-                {
-                    ...tankMeta.metaData,
-                    pumpID: pumpId,
-                }
-            );
+    const allocatePump = async (pumpID: string) => {
+        const tankMetaBody = {
+            ...tankMeta.metaData,
+            pumpID: pumpID,
+        };
 
-            if (responseMetaData.status === 200) {
-                updatePump(pumpId, true).then(() => {
-                    ToastAndroid.show("Pump allocated", 2000);
-                    onCancel();
-                });
-                // toast.error("Failed to update tank details");
+        try {
+            const response = await axios.post(
+                `${backendUrl}/tanks/${tankId}/profile`,
+                tankMetaBody
+            );
+            if (response.status === 200) {
+                await updatePump(pumpID, true);
+                ToastAndroid.show("Pump allocated", 2000);
+                if (tankId) {
+                    updateDeviceMeta(
+                        tankMetaBody as unknown as MetaInformation,
+                        tankId,
+                        "TANK"
+                    );
+                }
             }
+            return response;
         } catch (err) {
             ToastAndroid.show("Failed to set pump", 2000);
-            // toast.error("Error while updating tank");
+        } finally {
+            setAllocatingPump(false);
+            onCancel();
         }
     };
 
@@ -151,7 +160,7 @@ const PumpSelection = ({
                                             name="power"
                                             size={45}
                                             color={
-                                                item.meta.assigned === true
+                                                item.meta.assigned
                                                     ? "gray"
                                                     : color.primaryColor
                                             }
@@ -159,11 +168,9 @@ const PumpSelection = ({
                                         <View style={[flex.col, { gap: 5 }]}>
                                             <Text
                                                 style={{
-                                                    color:
-                                                        item.meta.assigned ===
-                                                        true
-                                                            ? "gray"
-                                                            : "black",
+                                                    color: item.meta.assigned
+                                                        ? "gray"
+                                                        : "black",
                                                 }}
                                             >
                                                 {item.name}
@@ -175,6 +182,9 @@ const PumpSelection = ({
                                                 }}
                                             >
                                                 {item.id}
+                                            </Text>
+                                            <Text>
+                                                {String(item.meta.assigned)}
                                             </Text>
                                         </View>
                                     </View>
@@ -233,11 +243,12 @@ const PumpSelection = ({
                     padding={12}
                     fontSize={fontSize.large}
                     width={120}
-                    title="Confirm"
+                    title={allocatingPump ? "Allocating..." : "Confirm"}
                     onPress={() => {
                         if (!selectedPump) {
                             if (!meta?.pumpID) {
                                 ToastAndroid.show("Select a pump", 3000);
+                                return;
                             }
                             onCancel();
                             return;
@@ -248,13 +259,13 @@ const PumpSelection = ({
                             showAlert({
                                 title: "Confirm Changes",
                                 message:
-                                    "Are you sure you want change the tank pump?",
+                                    "Are you sure you want to change the pump for this tank?",
                                 cancelText: "cancel",
-                                okText: "confirm",
+                                okText: "Confirm",
                                 onConfirm: () => {
+                                    const pumpToRemoveId = meta?.pumpID;
                                     allocatePump(selectedPump.id).then(() => {
-                                        meta?.pumpID &&
-                                            updatePump(meta?.pumpID, false);
+                                        updatePump(pumpToRemoveId, false);
                                     });
                                 },
                             });
@@ -276,7 +287,7 @@ export default function TankDetailsCard({
     analytics,
     on,
 }: Partial<X>) {
-    const { pumps, ipAddress } = useDeviceContext();
+    const { pumps, ipAddress, updateDeviceMeta } = useDeviceContext();
     const [pumpState, setPumpState] = useState<boolean | undefined>(false);
     const backendUrl = getBackendUrl(ipAddress);
 
@@ -292,16 +303,13 @@ export default function TankDetailsCard({
         const value: boolean =
             pump?.actuators[0].value.state === 1 ? true : false;
 
-        console.log(value);
         setPumpState(value);
-
-        console.log(value);
     };
 
-    const togglePump = async (state: boolean | number, pumpId: string) => {
+    const togglePump = async (state: boolean | number, pumpID: string) => {
         try {
             const actuatePump = await axios.post(
-                `${backendUrl}/tanks/${pumpId}/pumps/state`,
+                `${backendUrl}/tanks/${pumpID}/pumps/state`,
                 { state }
             );
 
@@ -322,36 +330,56 @@ export default function TankDetailsCard({
         }
     };
 
-    const detachPump = async (pumpId: string, tankId: string) => {
+    // 672a132a68f31909570aa02e
+    // 672a2c3168f31908f86456f7
+    // 672a2c8a68f31908f86456f9
+
+    const updatePump = async (pumpID: string, status?: boolean) => {
         try {
-            const responseMetaData = await axios.post(
-                `${backendUrl}/tanks/${tankId}/profile`,
-                {
-                    ...meta,
-                    pumpID: "",
-                }
+            const { data: currentMetaData } = await axios.get<MetaInformation>(
+                `${backendUrl}/tanks/${pumpID}/profile`
             );
 
-            if (responseMetaData.status === 200) {
-                updatePump(pumpId, false).then(() => {
-                    ToastAndroid.show("Pump removed from this tank", 2000);
-                });
-            }
+            const deviceMeta = {
+                ...currentMetaData,
+                assigned: status,
+            };
+
+            await axios.post(
+                `${backendUrl}/tanks/${pumpID}/profile`,
+                deviceMeta
+            );
+
+            updateDeviceMeta(deviceMeta, pumpID, "PUMP");
         } catch (err) {
             ToastAndroid.show("Failed to set pump", 2000);
         }
     };
 
-    const updatePump = async (pumpId: string, status?: boolean) => {
-        // Implement the updatePump function here
+    const detachPump = async (pumpID: string, tankId: string) => {
         try {
-            const { data: currentData } = await axios.get<MetaInformation>(
-                `${backendUrl}/tanks/${pumpId}/profile`
+            const deviceMeta = {
+                ...meta,
+                pumpID: "",
+            };
+
+            const responseMetaData = await axios.post(
+                `${backendUrl}/tanks/${tankId}/profile`,
+                deviceMeta
             );
-            await axios.post(`${backendUrl}/tanks/${pumpId}/profile`, {
-                ...currentData,
-                assigned: status,
-            });
+
+            if (responseMetaData.status === 200) {
+                updateDeviceMeta(
+                    deviceMeta as unknown as MetaInformation,
+                    tankId,
+                    "TANK"
+                );
+
+                //update pump NB: spread data in the update pump fx
+                updatePump(pumpID, false).then(() => {
+                    ToastAndroid.show("Pump removed from this tank", 2000);
+                });
+            }
         } catch (err) {
             ToastAndroid.show("Failed to set pump", 2000);
         }
@@ -367,7 +395,7 @@ export default function TankDetailsCard({
         });
 
         setConnectedPump(usePump);
-    }, [connectedPump]);
+    }, [connectedPump, meta]);
 
     return (
         <View style={style.container}>
@@ -512,7 +540,7 @@ export default function TankDetailsCard({
                             onPress={() => {
                                 showAlert({
                                     title: "Remove Pump",
-                                    message: `Are you sure you want to disconnect ${connectedPump?.name}  from this tank?  `,
+                                    message: `Are you sure you want to disconnect ${connectedPump?.name} from this tank?  `,
                                     cancelText: "Back",
                                     okText: "Disconnect",
                                     onConfirm: () => {
