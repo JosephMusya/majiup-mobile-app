@@ -96,47 +96,57 @@ export default function Dashboard({ navigation }: any) {
             ) : (
                 <>
                     <View style={[flex.row, { padding: 8, gap: 8 }]}>
-                        <CustomButton
-                            title="Tanks"
-                            width={90}
-                            color={
-                                filter === "Tanks"
-                                    ? color.primaryColor
-                                    : color.complementaryColor
-                            }
-                            textColor={
-                                filter === "Tanks" ? "#fff" : color.textColor
-                            }
-                            onPress={() => toggleFilter("Tanks")}
-                        />
-                        <CustomButton
-                            title="Pumps"
-                            width={90}
-                            color={
-                                filter === "Pumps"
-                                    ? color.primaryColor
-                                    : color.complementaryColor
-                            }
-                            textColor={
-                                filter === "Pumps" ? "#fff" : color.textColor
-                            }
-                            onPress={() => toggleFilter("Pumps")}
-                        />
-                        {/* {meters.length > 0 && ( */}
-                        <CustomButton
-                            title="Water Meters"
-                            width={90}
-                            color={
-                                filter === "Meters"
-                                    ? color.primaryColor
-                                    : color.complementaryColor
-                            }
-                            textColor={
-                                filter === "Meters" ? "#fff" : color.textColor
-                            }
-                            onPress={() => toggleFilter("Meters")}
-                        />
-                        {/* )} */}
+                        {tanks.length > 0 && (
+                            <CustomButton
+                                title="Tanks"
+                                width={90}
+                                color={
+                                    filter === "Tanks"
+                                        ? color.primaryColor
+                                        : color.complementaryColor
+                                }
+                                textColor={
+                                    filter === "Tanks"
+                                        ? "#fff"
+                                        : color.textColor
+                                }
+                                onPress={() => toggleFilter("Tanks")}
+                            />
+                        )}
+                        {pumps.length > 0 && (
+                            <CustomButton
+                                title="Pumps"
+                                width={90}
+                                color={
+                                    filter === "Pumps"
+                                        ? color.primaryColor
+                                        : color.complementaryColor
+                                }
+                                textColor={
+                                    filter === "Pumps"
+                                        ? "#fff"
+                                        : color.textColor
+                                }
+                                onPress={() => toggleFilter("Pumps")}
+                            />
+                        )}
+                        {meters.length > 0 && (
+                            <CustomButton
+                                title="Water Meters"
+                                width={90}
+                                color={
+                                    filter === "Meters"
+                                        ? color.primaryColor
+                                        : color.complementaryColor
+                                }
+                                textColor={
+                                    filter === "Meters"
+                                        ? "#fff"
+                                        : color.textColor
+                                }
+                                onPress={() => toggleFilter("Meters")}
+                            />
+                        )}
                     </View>
                     {filter === "Tanks" && (
                         <ScrollView

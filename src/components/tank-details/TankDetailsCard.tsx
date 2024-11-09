@@ -183,9 +183,6 @@ const PumpSelection = ({
                                             >
                                                 {item.id}
                                             </Text>
-                                            <Text>
-                                                {String(item.meta.assigned)}
-                                            </Text>
                                         </View>
                                     </View>
                                     {selectedPump?.id === item.id ||
