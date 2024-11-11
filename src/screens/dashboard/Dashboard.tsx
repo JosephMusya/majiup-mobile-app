@@ -226,26 +226,9 @@ export default function Dashboard({ navigation }: any) {
                         >
                             {meters?.length > 0 ? (
                                 <FlatList
-                                    data={pumps}
-                                    // ListEmptyComponent={() => (
-                                    //   <EmptyBox text="No Tanks Found" color="orange" />
-                                    // )}
+                                    data={meters}
                                     renderItem={({ item }) => {
-                                        return (
-                                            <MeterCard
-                                                meter={item}
-                                                // onPress={() =>
-                                                //     navigate({
-                                                //         name: item.name,
-                                                //         id: item.id,
-                                                //     } as TankViewProp)
-                                                // }
-                                                // editTank={() =>
-                                                //     navigation.navigate("Settings")
-                                                // }
-                                                // tank={item}
-                                            />
-                                        );
+                                        return <MeterCard meter={item} />;
                                     }}
                                     scrollEnabled={false}
                                 />

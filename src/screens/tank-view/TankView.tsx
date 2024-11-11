@@ -39,13 +39,13 @@ export default function TankView({}) {
         Params: { tank: X };
     };
 
-    const { ipAddress, devices, fetchData } = useDeviceContext();
+    const { ipAddress, tanks, fetchData } = useDeviceContext();
     const backendUrl = getBackendUrl(ipAddress);
 
     const route = useRoute<RouteProp<MyParamList>>();
     const { id }: any = route.params;
 
-    const device = devices.find((device: X) => device.id === id);
+    const device = tanks.find((device: X) => device.id === id);
 
     type usage = "h" | "d";
 
