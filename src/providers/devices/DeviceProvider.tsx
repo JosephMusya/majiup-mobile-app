@@ -176,7 +176,7 @@ export const DeviceContext = createContext<DeviceContextValues>({
     tanks: [],
     pumps: [],
     meters: [],
-    updateDeviceMeta: (meta, device, type) => {},
+    updateDeviceMeta: () => {},
 });
 
 export const DeviceProvider = ({ children }: Props) => {
@@ -383,53 +383,25 @@ export const DeviceProvider = ({ children }: Props) => {
                 }
                 return device;
             });
-
-            newTanks && setTanks([...newTanks]);
+            setWaterTanks([...newTanks]);
             return;
         } else if (type === "PUMP") {
             const pumpToChange = pumps.find((pump) => {
                 return pump.id === deviceId;
             });
-            console.log(
-                "-------------------------------------------------------------"
-            );
-            console.log("OLD\n");
-            console.log(
-                "-------------------------------------------------------------"
-            );
-
-            console.log(
-                pumps.map((pump) => {
-                    console.log(pump.id + " ----> " + pump.meta.assigned);
-                })
-            );
+            console.log(meta);
 
             if (pumpToChange) {
                 // Create a new object with the updated meta field
-                console.log(pumpToChange);
                 const updatedDevice = {
                     ...pumpToChange,
                     meta: meta,
                 };
 
-                console.log(meta);
-
                 // Map over pumps to replace only the found device
                 const newPumps = pumps.map((device: X) => {
                     return device.id === deviceId ? updatedDevice : device;
                 });
-                // console.log(
-                //     "-------------------------------------------------------------"
-                // );
-                // console.log("NEW\n");
-                // console.log(
-                //     "-------------------------------------------------------------"
-                // );
-                // console.log(
-                //     newPumps.map((pump) => {
-                //         console.log(pump.id + " ----> " + pump.meta.assigned);
-                //     })
-                // );
 
                 setPumps([...newPumps]);
             }
