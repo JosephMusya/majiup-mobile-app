@@ -51,7 +51,7 @@ export default function TankCard({
                             justifyContent: "space-between",
                             flexGrow: 1,
                             backgroundColor: "#f2f2f2",
-                            padding: 8,
+                            padding: 10,
                             overflow: "hidden",
                             borderTopEndRadius: 3,
                             borderTopLeftRadius: 3,
@@ -65,7 +65,7 @@ export default function TankCard({
                     >
                         {tank.name}
                     </Text>
-                    {!tank.on && (
+                    {/* {!tank.on && (
                         <Text>
                             {getLastSeen(
                                 tank?.sensors?.find((sensor) => {
@@ -73,7 +73,7 @@ export default function TankCard({
                                 })?.time
                             )}
                         </Text>
-                    )}
+                    )} */}
                     <Status status={tank.on} />
                 </View>
                 {sensors ? (
@@ -83,7 +83,7 @@ export default function TankCard({
                             {
                                 flexGrow: 1,
                                 justifyContent: "space-between",
-                                padding: 4,
+                                padding: 10,
                             },
                         ]}
                     >

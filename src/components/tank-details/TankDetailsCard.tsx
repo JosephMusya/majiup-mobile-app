@@ -22,6 +22,7 @@ import { useDeviceContext } from "../../providers/devices/DeviceProvider";
 import { getBackendUrl } from "../../private/env";
 import axios, { AxiosResponse } from "axios";
 import { showAlert } from "../../utils/fx/alert";
+import EmptyBox from "../containers/EmptyBox";
 
 const PumpSelection = ({
     pumps,
@@ -127,93 +128,114 @@ const PumpSelection = ({
                     paddingBottom: "22%",
                 }}
             >
-                <FlatList
-                    data={pumps}
-                    renderItem={({ item }) => {
-                        return (
-                            <TouchableNativeFeedback
-                                onPress={() => {
-                                    setPump(item);
-                                }}
-                                key={item.id}
-                            >
-                                <View
-                                    style={[
-                                        flex.row,
-                                        {
-                                            gap: 10,
-                                            justifyContent: "space-between",
-                                            padding: 10,
-                                            width: "100%",
-                                        },
-                                    ]}
+                {pumps.length ? (
+                    <FlatList
+                        data={pumps}
+                        renderItem={({ item }) => {
+                            return (
+                                <TouchableNativeFeedback
+                                    onPress={() => {
+                                        setPump(item);
+                                    }}
+                                    key={item.id}
                                 >
                                     <View
                                         style={[
                                             flex.row,
                                             {
                                                 gap: 10,
+                                                justifyContent: "space-between",
+                                                padding: 10,
+                                                width: "100%",
                                             },
                                         ]}
                                     >
-                                        <Ionicons
-                                            name="power"
-                                            size={45}
-                                            color={
-                                                item.meta.assigned
-                                                    ? "gray"
-                                                    : color.primaryColor
-                                            }
-                                        />
-                                        <View style={[flex.col, { gap: 5 }]}>
-                                            <Text
-                                                style={{
-                                                    color: item.meta.assigned
+                                        <View
+                                            style={[
+                                                flex.row,
+                                                {
+                                                    gap: 10,
+                                                },
+                                            ]}
+                                        >
+                                            <Ionicons
+                                                name="power"
+                                                size={45}
+                                                color={
+                                                    item.meta.assigned
                                                         ? "gray"
-                                                        : "black",
-                                                }}
-                                            >
-                                                {item.name}
-                                            </Text>
-                                            <Text
-                                                style={{
-                                                    fontSize: fontSize.medium,
-                                                    color: "gray",
-                                                }}
-                                            >
-                                                {item.id}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    {selectedPump?.id === item.id ||
-                                    (meta?.pumpID === item.id &&
-                                        !selectedPump?.id) ? (
-                                        <View>
-                                            <MaterialIcons
-                                                name="check-circle"
-                                                size={24}
-                                                color={color.primaryColor}
+                                                        : color.primaryColor
+                                                }
                                             />
-                                        </View>
-                                    ) : (
-                                        item.meta.assigned && (
-                                            <Text
-                                                style={{
-                                                    fontSize: fontSize.medium,
-                                                    color: "gray",
-                                                }}
+                                            <View
+                                                style={[flex.col, { gap: 5 }]}
                                             >
-                                                {item.id === meta?.pumpID
-                                                    ? "Current Pump"
-                                                    : "Allocated"}
-                                            </Text>
-                                        )
-                                    )}
-                                </View>
-                            </TouchableNativeFeedback>
-                        );
-                    }}
-                />
+                                                <Text
+                                                    style={{
+                                                        color: item.meta
+                                                            .assigned
+                                                            ? "gray"
+                                                            : "black",
+                                                    }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                                <Text
+                                                    style={{
+                                                        fontSize:
+                                                            fontSize.medium,
+                                                        color: "gray",
+                                                    }}
+                                                >
+                                                    {item.id}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        {selectedPump?.id === item.id ||
+                                        (meta?.pumpID === item.id &&
+                                            !selectedPump?.id) ? (
+                                            <View>
+                                                <MaterialIcons
+                                                    name="check-circle"
+                                                    size={24}
+                                                    color={color.primaryColor}
+                                                />
+                                            </View>
+                                        ) : (
+                                            item.meta.assigned && (
+                                                <Text
+                                                    style={{
+                                                        fontSize:
+                                                            fontSize.medium,
+                                                        color: "gray",
+                                                    }}
+                                                >
+                                                    {item.id === meta?.pumpID
+                                                        ? "Current Pump"
+                                                        : "Allocated"}
+                                                </Text>
+                                            )
+                                        )}
+                                    </View>
+                                </TouchableNativeFeedback>
+                            );
+                        }}
+                    />
+                ) : (
+                    <View style={[flex.col, { height: 200 }]}>
+                        <EmptyBox
+                            text="No pumps detected"
+                            color={color.secondaryColor}
+                            children={
+                                <Entypo
+                                    name="block"
+                                    size={24}
+                                    color={color.secondaryColor}
+                                />
+                            }
+                        />
+                    </View>
+                )}
             </View>
             <View
                 style={[
@@ -262,7 +284,8 @@ const PumpSelection = ({
                                 onConfirm: () => {
                                     const pumpToRemoveId = meta?.pumpID;
                                     allocatePump(selectedPump.id).then(() => {
-                                        updatePump(pumpToRemoveId, false);
+                                        pumpToRemoveId &&
+                                            updatePump(pumpToRemoveId, false);
                                     });
                                 },
                             });
@@ -516,7 +539,8 @@ export default function TankDetailsCard({
                             value={pumpState}
                             thumbColor={pumpState ? color.primaryColor : "gray"}
                             onChange={() => {
-                                togglePump(pumpState ? 0 : 1, meta.pumpID);
+                                meta.pumpID &&
+                                    togglePump(pumpState ? 0 : 1, meta.pumpID);
                                 // setPumpState((pumpState) => !pumpState);
                             }}
                         />
