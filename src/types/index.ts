@@ -75,7 +75,7 @@ export type MetaInformation = {
         capacity: number;
     };
     profile: Profile;
-    pumpID: string;
+    pumpID?: string;
     assigned?: boolean;
 };
 
