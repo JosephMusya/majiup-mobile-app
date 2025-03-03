@@ -16,18 +16,9 @@ pipeline {
             }
         }
 
-        stage('Setup Node.js') {
+        stage('Install Dependencies') {
             steps {
-                script {
-                    def nodejs = tool name: 'NodeJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    env.PATH = "${nodejs}/bin:${env.PATH}"
-                }
-            }
-        }
-
-        stage('Install Majiup Mobile App Dependencies') {
-            steps {
-                sh 'npm install'
+                sh 'pnpm install'
             }
         }
 
