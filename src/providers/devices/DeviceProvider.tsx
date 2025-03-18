@@ -86,13 +86,13 @@ type DeviceContextValues = {
     ipAddress: string | null;
     storeIpAddress?: (ip: string | null | undefined) => void;
     tanks: X[];
-    pumps: X[];
+    actuators: X[];
     meters: X[];
 
     updateDeviceMeta: (
         meta: MetaInformation,
         deviceId: string,
-        type: "PUMP" | "TANK"
+        type: "ACTUATOR" | "TANK"
     ) => void;
 };
 
@@ -174,7 +174,7 @@ export const DeviceContext = createContext<DeviceContextValues>({
     getNotifications: () => {},
     ipAddress: getIpAddress(),
     tanks: [],
-    pumps: [],
+    actuators: [],
     meters: [],
     updateDeviceMeta: () => {},
 });
@@ -220,7 +220,7 @@ export const DeviceProvider = ({ children }: Props) => {
         })
     );
 
-    const [pumps, setPumps] = useState<X[]>(
+    const [actuators, setActuators] = useState<X[]>(
         devices.filter((device) => {
             return device.actuators?.some(
                 (actuator) => actuator.meta.kind === "Motor"
@@ -351,7 +351,7 @@ export const DeviceProvider = ({ children }: Props) => {
             })
         );
 
-        setPumps(
+        setActuators(
             devices.filter((device) => {
                 return device.actuators?.some(
                     (actuator) => actuator.meta.kind === "Motor"
@@ -371,7 +371,7 @@ export const DeviceProvider = ({ children }: Props) => {
     const updateDeviceMeta = (
         meta: MetaInformation,
         deviceId: string,
-        type: "TANK" | "PUMP"
+        type: "TANK" | "ACTUATOR"
     ) => {
         if (type === "TANK") {
             const newTanks = tanks.map((device: X) => {
@@ -385,25 +385,25 @@ export const DeviceProvider = ({ children }: Props) => {
             });
             setWaterTanks([...newTanks]);
             return;
-        } else if (type === "PUMP") {
-            const pumpToChange = pumps.find((pump) => {
-                return pump.id === deviceId;
+        } else if (type === "ACTUATOR") {
+            const actuatorsToChange = actuators.find((actuator) => {
+                return actuator.id === deviceId;
             });
             console.log(meta);
 
-            if (pumpToChange) {
+            if (actuatorsToChange) {
                 // Create a new object with the updated meta field
                 const updatedDevice = {
-                    ...pumpToChange,
+                    ...actuatorsToChange,
                     meta: meta,
                 };
 
-                // Map over pumps to replace only the found device
-                const newPumps = pumps.map((device: X) => {
+                // Map over actuators to replace only the found device
+                const newActuators = actuators.map((device: X) => {
                     return device.id === deviceId ? updatedDevice : device;
                 });
 
-                setPumps([...newPumps]);
+                setActuators([...newActuators]);
             }
         }
     };
@@ -565,14 +565,14 @@ export const DeviceProvider = ({ children }: Props) => {
             });
 
         axios
-            .get(`${backendUrl}/pumps`, {
+            .get(`${backendUrl}/actuators`, {
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
                 },
             })
             .then(() => {
-                // console.log("PUMPS: ", data);
+                // console.log("ACT: ", data);
             });
 
         return devices;
@@ -724,10 +724,10 @@ export const DeviceProvider = ({ children }: Props) => {
             const device = devices.find(
                 (device: Tank) => device.id === topic.split("/")[1]
             );
-            const pumpStatus = message.toString();
+            const actuatorStatus = message.toString();
             if (device) {
                 // device.on = true;
-                device.actuators[0].value.state = Number(pumpStatus);
+                device.actuators[0].value.state = Number(actuatorStatus);
                 setTanks([...devices]);
             }
         }
@@ -811,6 +811,7 @@ export const DeviceProvider = ({ children }: Props) => {
 
     useEffect(() => {
         if (!ipAddress) {
+            storeIpAddress("wazigate.local");
             getIpAddress();
         }
     }, [ipAddress]);
@@ -893,7 +894,7 @@ export const DeviceProvider = ({ children }: Props) => {
         ipAddress,
         storeIpAddress,
         tanks,
-        pumps,
+        actuators,
         meters,
         updateDeviceMeta,
     };
