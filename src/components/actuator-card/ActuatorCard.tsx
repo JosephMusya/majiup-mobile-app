@@ -15,35 +15,35 @@ import axios from "axios";
 import { getBackendUrl } from "../../private/env";
 import { useDeviceContext } from "../../providers/devices/DeviceProvider";
 
-export default function PumpCard({ pump }: { pump: X }) {
+export default function ActuatorCard({ actuator }: { actuator: X }) {
     const { ipAddress } = useDeviceContext();
     const backendUrl = getBackendUrl(ipAddress);
-    const [pumpState, setPumpState] = useState<boolean | undefined>(false);
+    const [actuatorState, setPumpState] = useState<boolean | undefined>(false);
 
-    const getPumpState = async (pump?: X) => {
+    const getPumpState = async (actuator?: X) => {
         const value: boolean =
-            pump?.actuators[0].value.state === 1 ? true : false;
+            actuator?.actuators[0].value.state === 1 ? true : false;
 
         setPumpState(value);
     };
 
-    const togglePump = async (state: boolean | number, pumpId: string) => {
+    const togglePump = async (state: boolean | number, actuatorId: string) => {
         try {
             const actuatePump = await axios.post(
-                `${backendUrl}/tanks/${pumpId}/pumps/state`,
+                `${backendUrl}/tanks/${actuatorId}/actuators/state`,
                 { state }
             );
 
             if (actuatePump.status === 200) {
                 setPumpState(state === 1 ? true : false);
                 ToastAndroid.show(
-                    `${pump.name} turned ${state === 1 ? "ON" : "OFF"}`,
+                    `${actuator.name} turned ${state === 1 ? "ON" : "OFF"}`,
                     3000
                 );
             }
         } catch (error) {
             ToastAndroid.show(
-                `Failed to switch pump ${state === 1 ? "ON" : "OFF"}`,
+                `Failed to switch actuator ${state === 1 ? "ON" : "OFF"}`,
                 3000
             );
         } finally {
@@ -51,12 +51,11 @@ export default function PumpCard({ pump }: { pump: X }) {
     };
 
     useEffect(() => {
-        pump && getPumpState(pump);
-    }, [pump]);
+        actuator && getPumpState(actuator);
+    }, [actuator]);
 
     return (
         <View>
-            {/* <TouchableNativeFeedback> */}
             <View
                 style={[
                     flex.row,
@@ -88,7 +87,7 @@ export default function PumpCard({ pump }: { pump: X }) {
                                 color: "black",
                             }}
                         >
-                            {pump.name}
+                            {actuator.name}
                         </Text>
                         <Text
                             style={{
@@ -96,19 +95,18 @@ export default function PumpCard({ pump }: { pump: X }) {
                                 color: "gray",
                             }}
                         >
-                            {pump.id}
+                            {actuator.id}
                         </Text>
                     </View>
                 </View>
                 <Switch
-                    value={pumpState}
-                    thumbColor={pumpState ? color.primaryColor : "gray"}
+                    value={actuatorState}
+                    thumbColor={actuatorState ? color.primaryColor : "gray"}
                     onChange={() => {
-                        togglePump(pumpState ? 0 : 1, pump.id);
+                        togglePump(actuatorState ? 0 : 1, actuator.id);
                     }}
                 />
             </View>
-            {/* </TouchableNativeFeedback> */}
         </View>
     );
 }

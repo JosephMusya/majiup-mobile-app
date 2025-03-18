@@ -16,21 +16,24 @@ export default function BottomSheet({
     minHeight,
     maxHeight,
     onClose,
+    ...props
 }: {
     children: React.JSX.Element;
     isVisible: boolean;
     minHeight?: number;
     maxHeight?: number;
     onClose?: () => void;
+    [key: string]: any;
 }) {
     return (
         <Modal
             visible={isVisible}
-            animationType="fade"
+            animationType="none"
             transparent={true}
             onRequestClose={onClose}
         >
             <Pressable
+                onPress={onClose}
                 style={[
                     styles.container,
                     {
@@ -39,7 +42,7 @@ export default function BottomSheet({
                     },
                 ]}
             >
-                <View
+                <Pressable
                     style={[
                         styles.content,
                         {
@@ -58,7 +61,7 @@ export default function BottomSheet({
                     >
                         {children}
                     </ScrollView>
-                </View>
+                </Pressable>
             </Pressable>
         </Modal>
     );

@@ -24,23 +24,23 @@ import axios, { AxiosResponse } from "axios";
 import { showAlert } from "../../utils/fx/alert";
 import EmptyBox from "../containers/EmptyBox";
 
-const PumpSelection = ({
-    pumps,
+const ActuatorSelection = ({
+    actuators,
     tankId,
     onCancel,
-    updatePump,
+    updateActuator,
     meta,
 }: {
     tankId: string | undefined;
-    pumps: X[];
+    actuators: X[];
     onCancel: () => void;
-    updatePump: (pumpID: string, status?: boolean) => Promise<void>; // Define type for updatePump
+    updateActuator: (actuatorID: string, status?: boolean) => Promise<void>; // Define type for updateActuator
     meta?: MetaInformation;
 }) => {
     const { ipAddress, updateDeviceMeta } = useDeviceContext();
-    const [selectedPump, setSelectedPump] = useState<X | null>();
+    const [selectedActuator, setSelectedActuator] = useState<X | null>();
     const backendUrl = getBackendUrl(ipAddress);
-    const [allocatingPump, setAllocatingPump] = useState<boolean>(false);
+    const [allocatingActuator, setAllocatingActuator] = useState<boolean>(false);
 
     const [tankMeta, setTankMeta] = useState<{
         metaData: MetaInformation | undefined;
@@ -48,23 +48,23 @@ const PumpSelection = ({
         metaData: meta,
     });
 
-    const setPump = (pump: X) => {
-        if (pump.meta.assigned === true) {
-            pump.id !== meta?.pumpID &&
+    const setActuator = (actuator: X) => {
+        if (actuator.meta.assigned === true) {
+            actuator.id !== meta?.actuatorID &&
                 ToastAndroid.show(
-                    "This pump is allocated to another tank",
+                    "This actuator is allocated to another tank",
                     3000
                 );
-            setSelectedPump(null);
+            setSelectedActuator(null);
             return;
         }
-        setSelectedPump(pump);
+        setSelectedActuator(actuator);
     };
 
-    const allocatePump = async (pumpID: string) => {
+    const allocateActuator = async (actuatorID: string) => {
         const tankMetaBody = {
             ...tankMeta.metaData,
-            pumpID: pumpID,
+            actuatorID: actuatorID,
         };
 
         try {
@@ -73,8 +73,8 @@ const PumpSelection = ({
                 tankMetaBody
             );
             if (response.status === 200) {
-                await updatePump(pumpID, true);
-                ToastAndroid.show("Pump allocated", 2000);
+                await updateActuator(actuatorID, true);
+                ToastAndroid.show("Actuator allocated", 2000);
                 if (tankId) {
                     updateDeviceMeta(
                         tankMetaBody as unknown as MetaInformation,
@@ -85,9 +85,9 @@ const PumpSelection = ({
             }
             return response;
         } catch (err) {
-            ToastAndroid.show("Failed to set pump", 2000);
+            ToastAndroid.show("Failed to set actuator", 2000);
         } finally {
-            setAllocatingPump(false);
+            setAllocatingActuator(false);
             onCancel();
         }
     };
@@ -118,7 +118,7 @@ const PumpSelection = ({
                         },
                     ]}
                 >
-                    {meta?.pumpID ? "Edit Pump" : "Select Pump"}
+                    {meta?.actuatorID ? "Edit Actuator" : "Select Actuator"}
                 </Text>
             </View>
             <View
@@ -128,14 +128,14 @@ const PumpSelection = ({
                     paddingBottom: "22%",
                 }}
             >
-                {pumps.length ? (
+                {actuators.length ? (
                     <FlatList
-                        data={pumps}
+                        data={actuators}
                         renderItem={({ item }) => {
                             return (
                                 <TouchableNativeFeedback
                                     onPress={() => {
-                                        setPump(item);
+                                        setActuator(item);
                                     }}
                                     key={item.id}
                                 >
@@ -191,9 +191,9 @@ const PumpSelection = ({
                                                 </Text>
                                             </View>
                                         </View>
-                                        {selectedPump?.id === item.id ||
-                                        (meta?.pumpID === item.id &&
-                                            !selectedPump?.id) ? (
+                                        {selectedActuator?.id === item.id ||
+                                        (meta?.actuatorID === item.id &&
+                                            !selectedActuator?.id) ? (
                                             <View>
                                                 <MaterialIcons
                                                     name="check-circle"
@@ -210,8 +210,8 @@ const PumpSelection = ({
                                                         color: "gray",
                                                     }}
                                                 >
-                                                    {item.id === meta?.pumpID
-                                                        ? "Current Pump"
+                                                    {item.id === meta?.actuatorID
+                                                        ? "Current Actuator"
                                                         : "Allocated"}
                                                 </Text>
                                             )
@@ -224,7 +224,7 @@ const PumpSelection = ({
                 ) : (
                     <View style={[flex.col, { height: 200 }]}>
                         <EmptyBox
-                            text="No pumps detected"
+                            text="No actuators detected"
                             color={color.secondaryColor}
                             children={
                                 <Entypo
@@ -237,65 +237,72 @@ const PumpSelection = ({
                     </View>
                 )}
             </View>
-            <View
-                style={[
-                    flex.row,
-                    {
-                        justifyContent: "space-around",
-                        width: "100%",
-                        paddingHorizontal: 20,
-                        gap: 30,
-                        position: "absolute",
-                        bottom: "5%",
-                    },
-                ]}
-            >
-                <CustomButton
-                    padding={12}
-                    width={120}
-                    fontSize={fontSize.large}
-                    title="Cancel"
-                    color="gray"
-                    onPress={onCancel}
-                />
-                <CustomButton
-                    padding={12}
-                    fontSize={fontSize.large}
-                    width={120}
-                    title={allocatingPump ? "Allocating..." : "Confirm"}
-                    onPress={() => {
-                        if (!selectedPump) {
-                            if (!meta?.pumpID) {
-                                ToastAndroid.show("Select a pump", 3000);
+            {actuators.length ? (
+                <View
+                    style={[
+                        flex.row,
+                        {
+                            justifyContent: "space-around",
+                            width: "100%",
+                            paddingHorizontal: 20,
+                            gap: 30,
+                            position: "absolute",
+                            bottom: "5%",
+                        },
+                    ]}
+                >
+                    <CustomButton
+                        padding={12}
+                        width={120}
+                        fontSize={fontSize.large}
+                        title="Cancel"
+                        color="gray"
+                        onPress={onCancel}
+                    />
+                    <CustomButton
+                        padding={12}
+                        fontSize={fontSize.large}
+                        width={120}
+                        title={allocatingActuator ? "Allocating..." : "Confirm"}
+                        onPress={() => {
+                            if (!selectedActuator) {
+                                if (!meta?.actuatorID) {
+                                    ToastAndroid.show("Select a actuator", 3000);
+                                    return;
+                                }
+                                onCancel();
+                                return;
+                            } else if (
+                                meta?.actuatorID !== selectedActuator.id &&
+                                meta?.actuatorID
+                            ) {
+                                showAlert({
+                                    title: "Confirm Changes",
+                                    message:
+                                        "Are you sure you want to change the actuator for this tank?",
+                                    cancelText: "cancel",
+                                    okText: "Confirm",
+                                    onConfirm: () => {
+                                        const actuatorToRemoveId = meta?.actuatorID;
+                                        allocateActuator(selectedActuator.id).then(
+                                            () => {
+                                                actuatorToRemoveId &&
+                                                    updateActuator(
+                                                        actuatorToRemoveId,
+                                                        false
+                                                    );
+                                            }
+                                        );
+                                    },
+                                });
+
                                 return;
                             }
-                            onCancel();
-                            return;
-                        } else if (
-                            meta?.pumpID !== selectedPump.id &&
-                            meta?.pumpID
-                        ) {
-                            showAlert({
-                                title: "Confirm Changes",
-                                message:
-                                    "Are you sure you want to change the pump for this tank?",
-                                cancelText: "cancel",
-                                okText: "Confirm",
-                                onConfirm: () => {
-                                    const pumpToRemoveId = meta?.pumpID;
-                                    allocatePump(selectedPump.id).then(() => {
-                                        pumpToRemoveId &&
-                                            updatePump(pumpToRemoveId, false);
-                                    });
-                                },
-                            });
-
-                            return;
-                        }
-                        allocatePump(selectedPump?.id);
-                    }}
-                />
-            </View>
+                            allocateActuator(selectedActuator?.id);
+                        }}
+                    />
+                </View>
+            ): null}
         </View>
     );
 };
@@ -307,42 +314,42 @@ export default function TankDetailsCard({
     analytics,
     on,
 }: Partial<X>) {
-    const { pumps, ipAddress, updateDeviceMeta } = useDeviceContext();
-    const [pumpState, setPumpState] = useState<boolean | undefined>(false);
+    const { actuators, ipAddress, updateDeviceMeta } = useDeviceContext();
+    const [actuatorState, setActuatorState] = useState<boolean | undefined>(false);
     const backendUrl = getBackendUrl(ipAddress);
 
     const [showBottomSheet, setShowBottomSheet] = useState<boolean>(false);
 
-    const [connectedPump, setConnectedPump] = useState<X | undefined>(
-        pumps?.find((pump) => {
-            return pump.id === meta?.pumpID;
+    const [connectedActuator, setConnectedActuator] = useState<X | undefined>(
+        actuators?.find((actuator) => {
+            return actuator.id === meta?.actuatorID;
         })
     );
 
-    const getPumpState = async (pump?: X) => {
+    const getActuatorState = async (actuator?: X) => {
         const value: boolean =
-            pump?.actuators[0].value.state === 1 ? true : false;
+            actuator?.actuators[0].value.state === 1 ? true : false;
 
-        setPumpState(value);
+        setActuatorState(value);
     };
 
-    const togglePump = async (state: boolean | number, pumpID: string) => {
+    const toggleActuator = async (state: boolean | number, actuatorID: string) => {
         try {
-            const actuatePump = await axios.post(
-                `${backendUrl}/tanks/${pumpID}/pumps/state`,
+            const actuateActuator = await axios.post(
+                `${backendUrl}/tanks/${actuatorID}/actuators/state`,
                 { state }
             );
 
-            if (actuatePump.status === 200) {
-                setPumpState(state === 1 ? true : state === 0 && false);
+            if (actuateActuator.status === 200) {
+                setActuatorState(state === 1 ? true : state === 0 && false);
                 ToastAndroid.show(
-                    `Pump turned ${state === 1 ? "ON" : "OFF"}`,
+                    `Actuator turned ${state === 1 ? "ON" : "OFF"}`,
                     3000
                 );
             }
         } catch (error) {
             ToastAndroid.show(
-                `Failed to switch pump ${state === 1 ? "ON" : "OFF"}`,
+                `Failed to switch actuator ${state === 1 ? "ON" : "OFF"}`,
                 3000
             );
             console.log(error);
@@ -354,10 +361,10 @@ export default function TankDetailsCard({
     // 672a2c3168f31908f86456f7
     // 672a2c8a68f31908f86456f9
 
-    const updatePump = async (pumpID: string, status?: boolean) => {
+    const updateActuator = async (actuatorID: string, status?: boolean) => {
         try {
             const { data: currentMetaData } = await axios.get<MetaInformation>(
-                `${backendUrl}/tanks/${pumpID}/profile`
+                `${backendUrl}/tanks/${actuatorID}/profile`
             );
 
             const deviceMeta = {
@@ -366,21 +373,21 @@ export default function TankDetailsCard({
             };
 
             await axios.post(
-                `${backendUrl}/tanks/${pumpID}/profile`,
+                `${backendUrl}/tanks/${actuatorID}/profile`,
                 deviceMeta
             );
 
-            updateDeviceMeta(deviceMeta, pumpID, "PUMP");
+            updateDeviceMeta(deviceMeta, actuatorID, "ACTUATOR");
         } catch (err) {
-            ToastAndroid.show("Failed to set pump", 2000);
+            ToastAndroid.show("Failed to set actuator", 2000);
         }
     };
 
-    const detachPump = async (pumpID: string, tankId: string) => {
+    const detachActuator = async (actuatorID: string, tankId: string) => {
         try {
             const deviceMeta = {
                 ...meta,
-                pumpID: "",
+                actuatorID: "",
             };
 
             const responseMetaData = await axios.post(
@@ -395,27 +402,27 @@ export default function TankDetailsCard({
                     "TANK"
                 );
 
-                //update pump NB: spread data in the update pump fx
-                updatePump(pumpID, false).then(() => {
-                    ToastAndroid.show("Pump removed from this tank", 2000);
+                //update actuator NB: spread data in the update actuator fx
+                updateActuator(actuatorID, false).then(() => {
+                    ToastAndroid.show("Actuator removed from this tank", 2000);
                 });
             }
         } catch (err) {
-            ToastAndroid.show("Failed to set pump", 2000);
+            ToastAndroid.show("Failed to set actuator", 2000);
         }
     };
 
     useEffect(() => {
-        if (connectedPump) {
-            getPumpState(connectedPump);
+        if (connectedActuator) {
+            getActuatorState(connectedActuator);
             return;
         }
-        const usePump = pumps?.find((pump) => {
-            return pump.id === meta?.pumpID;
+        const useActuator = actuators?.find((actuator) => {
+            return actuator.id === meta?.actuatorID;
         });
 
-        setConnectedPump(usePump);
-    }, [connectedPump, meta]);
+        setConnectedActuator(useActuator);
+    }, [connectedActuator, meta]);
 
     return (
         <View style={style.container}>
@@ -424,11 +431,11 @@ export default function TankDetailsCard({
                 minHeight={Dimensions.get("window").height * 0.45}
                 onClose={() => setShowBottomSheet(false)}
                 children={
-                    <PumpSelection
-                        pumps={pumps}
+                    <ActuatorSelection
+                        actuators={actuators}
                         tankId={id}
                         meta={meta}
-                        updatePump={updatePump}
+                        updateActuator={updateActuator}
                         onCancel={() => setShowBottomSheet(false)}
                     />
                 }
@@ -524,7 +531,7 @@ export default function TankDetailsCard({
                     {on ? "Online" : "Offline"}
                 </Text>
             </View>
-            {meta?.pumpID ? (
+            {meta?.actuatorID ? (
                 <>
                     <View style={[flex.row, style.items]}>
                         <View style={[flex.row, { gap: 10 }]}>
@@ -533,15 +540,15 @@ export default function TankDetailsCard({
                                 size={20}
                                 color={color.primaryColor}
                             />
-                            <Text>Pump Status</Text>
+                            <Text>Actuator Status</Text>
                         </View>
                         <Switch
-                            value={pumpState}
-                            thumbColor={pumpState ? color.primaryColor : "gray"}
+                            value={actuatorState}
+                            thumbColor={actuatorState ? color.primaryColor : "gray"}
                             onChange={() => {
-                                meta.pumpID &&
-                                    togglePump(pumpState ? 0 : 1, meta.pumpID);
-                                // setPumpState((pumpState) => !pumpState);
+                                meta.actuatorID &&
+                                    toggleActuator(actuatorState ? 0 : 1, meta.actuatorID);
+                                // setActuatorState((actuatorState) => !actuatorState);
                             }}
                         />
                     </View>
@@ -556,25 +563,25 @@ export default function TankDetailsCard({
                         ]}
                     >
                         <CustomButton
-                            title="Detach Pump"
+                            title="Detach Actuator"
                             color="gray"
                             onPress={() => {
                                 showAlert({
-                                    title: "Remove Pump",
-                                    message: `Are you sure you want to disconnect ${connectedPump?.name} from this tank?  `,
+                                    title: "Remove Actuator",
+                                    message: `Are you sure you want to disconnect ${connectedActuator?.name} from this tank?  `,
                                     cancelText: "Back",
                                     okText: "Disconnect",
                                     onConfirm: () => {
-                                        connectedPump?.id &&
+                                        connectedActuator?.id &&
                                             id &&
-                                            detachPump(connectedPump?.id, id);
+                                            detachActuator(connectedActuator?.id, id);
                                     },
                                 });
                             }}
                             width={120}
                         />
                         <CustomButton
-                            title="Modify Pump"
+                            title="Modify Actuator"
                             width={120}
                             onPress={() => setShowBottomSheet(true)}
                         />
@@ -591,10 +598,10 @@ export default function TankDetailsCard({
                     ]}
                 >
                     <CustomButton
-                        title="Connect pump to this tank"
+                        title="Connect actuator to this tank"
                         onPress={() => {
                             setShowBottomSheet(true);
-                            //showBottomSheetWith pumps available
+                            //showBottomSheetWith actuators available
                         }}
                     />
                 </View>
