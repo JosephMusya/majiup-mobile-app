@@ -18,7 +18,7 @@ import { Filter, TankViewProp, X } from "../../types";
 import { Entypo, Feather, FontAwesome } from "@expo/vector-icons";
 import { Text } from "react-native";
 import CustomButton from "../../components/button/Button";
-import PumpCard from "../../components/pump-card/PumpCard";
+import ActuatorCard from "../../components/actuator-card/ActuatorCard";
 import MeterCard from "../../components/meter-card/MeterCard";
 
 const PlaceHolderBox = ({ text }: { text: string }) => {
@@ -52,7 +52,7 @@ export default function Dashboard({ navigation }: any) {
         timeoutErr,
         fetchData,
         tanks,
-        pumps,
+        actuators,
         meters,
     } = useDeviceContext();
 
@@ -113,21 +113,21 @@ export default function Dashboard({ navigation }: any) {
                                 onPress={() => toggleFilter("Tanks")}
                             />
                         )}
-                        {pumps.length > 0 && (
+                        {actuators?.length > 0 && (
                             <CustomButton
-                                title="Pumps"
+                                title="Actuators"
                                 width={90}
                                 color={
-                                    filter === "Pumps"
+                                    filter === "Actuators"
                                         ? color.primaryColor
                                         : color.complementaryColor
                                 }
                                 textColor={
-                                    filter === "Pumps"
+                                    filter === "Actuators"
                                         ? "#fff"
                                         : color.textColor
                                 }
-                                onPress={() => toggleFilter("Pumps")}
+                                onPress={() => toggleFilter("Actuators")}
                             />
                         )}
                         {meters.length > 0 && (
@@ -190,7 +190,7 @@ export default function Dashboard({ navigation }: any) {
                         </ScrollView>
                     )}
 
-                    {filter === "Pumps" && (
+                    {filter === "Actuators" && (
                         <ScrollView
                             refreshControl={
                                 <RefreshControl
@@ -200,16 +200,16 @@ export default function Dashboard({ navigation }: any) {
                             }
                             style={style.container}
                         >
-                            {pumps?.length > 0 ? (
+                            {actuators?.length > 0 ? (
                                 <FlatList
-                                    data={pumps}
+                                    data={actuators}
                                     renderItem={({ item }) => {
-                                        return <PumpCard pump={item} />;
+                                        return <ActuatorCard actuator={item} />;
                                     }}
                                     scrollEnabled={false}
                                 />
                             ) : (
-                                <PlaceHolderBox text="No pumps connected!" />
+                                <PlaceHolderBox text="No actuators connected!" />
                             )}
                         </ScrollView>
                     )}

@@ -146,7 +146,7 @@ export default function TankView({}) {
                             closeChart={() => setShowGraph(false)}
                         />
                     )}
-                    {!showGraph && (
+                    {/* {!showGraph && (
                         <View style={[flex.row, { justifyContent: "center" }]}>
                             <CustomButton
                                 color={color.primaryColor}
@@ -164,7 +164,7 @@ export default function TankView({}) {
                                 title={"Show Graph"}
                             />
                         </View>
-                    )}
+                    )} */}
                 </View>
             </ScrollView>
         </SafeAreaView>
