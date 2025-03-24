@@ -24,16 +24,16 @@ pipeline {
 
         stage('Authenticate with Expo Token') { //the token is stored in the credentials (expo-token)
             steps {
-                sh 'npx expo login --token $EXPO_TOKEN'
+                // sh 'npx expo login --token $EXPO_TOKEN'
+                sh 'npx expo login -p $EXPO_TOKEN'
             }
         }
 
         stage('Build App with EAS') { // build app
             steps {
-                sh 'npx eas build --profile production --platform android --non-interactive'
+                sh 'npx eas build --profile production --platform android --non-interactive --progress plain'
             }
         }
-
 
         // stage('Deploy App to Playstore') {
         //     steps {
