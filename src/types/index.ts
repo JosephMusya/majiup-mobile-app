@@ -11,6 +11,7 @@ export type Screen = {
 
 export interface Tank {
     actuators: Actuator[];
+    sensors: Sensor[];
     capacity: number;
     created: Date;
     height: number;
@@ -22,7 +23,6 @@ export interface Tank {
     name: string;
     notifications: { messages: Notification[] };
     radius: number;
-    sensors: Sensor[];
     width?: number;
     analytics: Analytics;
 }
@@ -46,15 +46,16 @@ export interface X extends Tank {
 export type Actuator = {
     created: Date;
     id: string;
-    meta: PumpMeta;
+    meta: ActuatorMeta;
     modified: Date;
     name: string;
     time: Date | null;
     value: { state: number };
 };
 
-type PumpMeta = {
-    kind: "Motor";
+type ActuatorMeta = {
+    kind: "Motor" | "Any";
+    external: boolean //actuator is used externally (not actuated by the same device where actuator is mounted)
 };
 
 export type MetaInformation = {
@@ -75,7 +76,8 @@ export type MetaInformation = {
         capacity: number;
     };
     profile: Profile;
-    pumpID?: string;
+
+    actuatorID?: string;
     assigned?: boolean;
 };
 
@@ -173,7 +175,7 @@ export type Notification = {
     deviceId?: string;
 };
 
-export type Filter = "Tanks" | "Pumps" | "Meters";
+export type Filter = "Tanks" | "Actuators" | "Meters";
 
 // ------------------->
 
